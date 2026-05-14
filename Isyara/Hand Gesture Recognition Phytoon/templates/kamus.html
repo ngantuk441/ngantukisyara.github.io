@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISYARA - Kamus BISINDO</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0fbfc; color: #1E6773; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 68px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid #b2ebf2;
+    box-shadow: 0 2px 16px rgba(31,163,184,0.08);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 900; color: #1FA3B8; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-user { font-size: 14px; font-weight: 600; color: #1E6773; }
+  .nav-back { background: #1FA3B8; color: white; padding: 8px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; }
+  .nav-logout { background: #fee2e2; color: #c53030; padding: 8px 18px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none; }
+
+  .main { padding: 88px 48px 48px; max-width: 1400px; margin: 0 auto; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+  .tab { padding: 10px 24px; border-radius: 12px; border: 2px solid #b2ebf2; background: white; color: #1FA3B8; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .tab.active { background: #1FA3B8; color: white; border-color: #1FA3B8; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .alphabet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+  .letter-card { background: white; border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; border: 2px solid #e0f7f9; transition: all 0.2s; position: relative; }
+  .letter-card:hover { border-color: #1FA3B8; transform: translateY(-4px); box-shadow: 0 8px 24px rgba(31,163,184,0.15); }
+  .letter-card.active { border-color: #1FA3B8; background: #e0f7f9; }
+  .letter-card img { width: 90px; height: 90px; object-fit: contain; border-radius: 8px; margin-bottom: 8px; }
+  .letter-label { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: #1FA3B8; }
+  .speak-btn { position: absolute; top: 8px; right: 8px; background: #e0f7f9; border: none; border-radius: 8px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .speak-btn:hover { background: #1FA3B8; color: white; }
+
+  .detail-panel { position: fixed; right: 0; top: 68px; bottom: 0; width: 340px; background: white; border-left: 2px solid #b2ebf2; padding: 24px; overflow-y: auto; display: none; flex-direction: column; gap: 16px; z-index: 50; }
+  .detail-panel.open { display: flex; }
+  .detail-letter { font-family: 'Nunito', sans-serif; font-size: 48px; font-weight: 900; color: #1FA3B8; text-align: center; }
+  .detail-img { width: 100%; border-radius: 16px; border: 2px solid #e0f7f9; }
+  .detail-title { font-size: 16px; font-weight: 700; color: #1E6773; margin-bottom: 8px; }
+  .detail-btn { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; }
+  .btn-speak { background: #e0f7f9; color: #1FA3B8; }
+  .btn-speak:hover { background: #1FA3B8; color: white; }
+  .btn-latihan { background: linear-gradient(135deg,#1FA3B8,#6da0af); color: white; }
+  .close-btn { background: #fee2e2; color: #c53030; border: none; border-radius: 10px; padding: 8px 16px; cursor: pointer; font-weight: 700; font-size: 13px; align-self: flex-end; }
+
+  .latihan-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+  .cam-section { background: white; border-radius: 20px; padding: 24px; border: 2px solid #e0f7f9; }
+  .cam-title { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: #1FA3B8; margin-bottom: 16px; }
+  .cam-box { border-radius: 12px; overflow: hidden; position: relative; }
+  .cam-box img { width: 100%; display: block; }
+  .gesture-overlay { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.85); border-radius: 20px; padding: 6px 16px; font-size: 14px; font-weight: 700; color: #1FA3B8; }
+  .kalimat-box { background: #e0f7f9; border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .kalimat-label { font-size: 11px; font-weight: 700; color: #1FA3B8; letter-spacing: 2px; margin-bottom: 8px; }
+  .kalimat-text { font-size: 2rem; font-weight: 900; color: #0e6876; letter-spacing: 4px; min-height: 48px; word-break: break-all; }
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .action-btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .btn-tts { background: #1FA3B8; color: white; }
+  .btn-tts:hover { background: #0e6876; }
+  .btn-mic { background: #b2ebf2; color: #22adce; }
+  .btn-mic.listening { background: #22cec5; color: white; animation: pulse 1s infinite; }
+  .btn-hapus { background: #fde68a; color: #92400e; }
+  .btn-reset { background: #fca5a5; color: #7f1d1d; }
+  .mode-btn {padding: 8px 20px; border-radius: 20px; border: 2px solid #1FA3B8; background: white; color: #1FA3B8; font-weight: 700; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s;}
+  .mode-btn.active {background: #1FA3B8; color: white; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+  .right-section { display: flex; flex-direction: column; gap: 16px; }
+  .info-card { background: white; border-radius: 16px; padding: 20px; border: 2px solid #e0f7f9; }
+  .info-label { font-size: 11px; font-weight: 700; color: #1FA3B8; letter-spacing: 2px; margin-bottom: 10px; }
+  .gesture-besar { font-size: 3rem; font-weight: 900; color: #0e6876; text-align: center; min-height: 60px; }
+  .history-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: linear-gradient(135deg,#1FA3B8,#6da0af); color: white; border-radius: 8px; padding: 6px 12px; font-size: 1rem; font-weight: 700; }
+
+  .speech-box { background: white; border-radius: 20px; padding: 28px; border: 2px solid #e0f7f9; }
+  .speech-title { font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 900; color: #1FA3B8; margin-bottom: 20px; }
+  .speech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .speech-card { background: #f0fbfc; border-radius: 14px; padding: 20px; border: 2px solid #e0f7f9; }
+  .speech-card h4 { font-size: 14px; font-weight: 700; color: #1E6773; margin-bottom: 12px; }
+  textarea { width: 100%; padding: 12px; border: 2px solid #b2ebf2; border-radius: 10px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px; outline: none; }
+  textarea:focus { border-color: #1FA3B8; }
+  .speech-btn { margin-top: 10px; padding: 10px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+  .btn-play { background: #1FA3B8; color: white; }
+  .btn-play:hover { background: #0e6876; }
+  .btn-record { background: #bde9ed; color: #215f49; }
+  .btn-record.active { background: #22ce7b; color: white; animation: pulse 1s infinite; }
+  .result-text { margin-top: 10px; padding: 10px; background: white; border-radius: 8px; min-height: 40px; font-size: 14px; color: #1E6773; border: 1px solid #b2ebf2; }
+
+  /* CHATBOT */
+  .chat-bubble { position: fixed; bottom: 24px; right: 24px; z-index: 1000; }
+  .chat-toggle { width: 60px; height: 60px; background: linear-gradient(135deg, #1FA3B8, #6da0af); border-radius: 50%; border: none; cursor: pointer; font-size: 28px; box-shadow: 0 8px 24px rgba(31,163,184,0.4); transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+  .chat-toggle:hover { transform: scale(1.1); }
+  .chat-window { position: absolute; bottom: 72px; right: 0; width: 340px; height: 480px; background: white; border-radius: 20px; box-shadow: 0 16px 48px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; border: 2px solid #e0f7f9; }
+  .chat-window.open { display: flex; }
+  .chat-header { background: linear-gradient(135deg, #1FA3B8, #6da0af); padding: 16px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+  .chat-header h4 { font-size: 15px; font-weight: 700; margin: 0; }
+  .chat-header p { font-size: 11px; opacity: 0.8; margin: 2px 0 0; }
+  .chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+  .msg.bot { background: #e0f7f9; color: #1E6773; align-self: flex-start; border-bottom-left-radius: 4px; }
+  .msg.user { background: #1FA3B8; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .msg.loading { background: #e0f7f9; color: #1FA3B8; }
+  .chat-actions { padding: 8px 16px; display: flex; gap: 6px; flex-wrap: wrap; border-top: 1px solid #e0f7f9; }
+  .quick-btn { padding: 5px 10px; background: #e0f7f9; color: #1FA3B8; border: none; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .quick-btn:hover { background: #1FA3B8; color: white; }
+  .chat-input-row { padding: 12px 16px; display: flex; gap: 8px; border-top: 1px solid #e0f7f9; }
+  .chat-input { flex: 1; padding: 10px 14px; border: 2px solid #e0f7f9; border-radius: 20px; font-size: 13px; outline: none; font-family: inherit; }
+  .chat-input:focus { border-color: #1FA3B8; }
+  .chat-send { width: 38px; height: 38px; background: #1FA3B8; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .chat-send:hover { background: #0e6876; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="{{ url_for('static', filename='images/lidm.png') }}" alt="Logo" style="height:40px; width:auto; border-radius:8px;">
+    ISYARA
+  </a>
+  <div class="nav-right">
+    <span class="nav-user">{{ user }}</span>
+    <a href="/" class="nav-back">Beranda</a>
+    <a href="/logout" class="nav-logout">Keluar</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('kamus', this)">Alfabet</button>
+    <button class="tab" onclick="showSection('angka', this)">Angka</button>
+    <button class="tab" onclick="showSection('hijaiyah', this)">Hijaiyah</button>
+    <button class="tab" onclick="showSection('latihan', this)">Latihan Kamera</button>
+    <button class="tab" onclick="showSection('speech', this)">Suara</button>
+  </div>
+
+  <div class="section active" id="kamusSection">
+    <div class="alphabet-grid" id="alphabetGrid"></div>
+  </div>
+
+  <div class="section" id="angkaSection">
+    <div class="alphabet-grid" id="angkaGrid"></div>
+  </div>
+
+  <div class="section" id="hijaiyahSection">
+    <div class="alphabet-grid" id="hijaiyahGrid"></div>
+  </div>
+
+  <div class="section" id="latihanSection">
+    <div class="latihan-grid">
+      <div class="cam-section">
+         <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <button class="mode-btn active" id="btnAlfabet" onclick="setMode('alfabet')">🔤 Alfabet</button>
+        <button class="mode-btn" id="btnAngka" onclick="setMode('angka')">🔢 Angka</button>
+      </div>
+        <div class="cam-title">Latihan Deteksi Gesture</div>
+        <div class="cam-box">
+          <img src="/video_feed" alt="Kamera">
+          <div class="gesture-overlay" id="gestureBadge">Mendeteksi...</div>
+        </div>
+        <div class="kalimat-box">
+          <div class="kalimat-label">KALIMAT TERBENTUK</div>
+          <div class="kalimat-text" id="sentenceText">_</div>
+          <div class="btn-row">
+            <button class="action-btn btn-tts" onclick="speakSentence()">Ucapkan</button>
+            <button class="action-btn btn-mic" id="micBtn" onclick="toggleMic()">Mikrofon</button>
+            <button class="action-btn btn-hapus" onclick="backspace()">Hapus</button>
+            <button class="action-btn btn-reset" onclick="clearSentence()">Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="right-section">
+        <div class="info-card">
+          <div class="info-label">GESTURE TERDETEKSI</div>
+          <div class="gesture-besar" id="currentGesture">-</div>
+        </div>
+        <div class="info-card">
+          <div class="info-label">RIWAYAT HURUF</div>
+          <div class="history-chips" id="historyLetters"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="speechSection">
+    <div class="speech-box">
+      <div class="speech-title">Suara</div>
+      <div class="speech-grid">
+        <div class="speech-card">
+          <h4>Text to Speech — Ketik teks, dengarkan suaranya</h4>
+          <textarea id="ttsInput" placeholder="Ketik teks di sini...">Halo, selamat belajar bahasa isyarat!</textarea>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="speech-btn btn-play" onclick="playTTS()">Putar Suara</button>
+            <button class="speech-btn" style="background:#e0f7f9;color:#1FA3B8;" onclick="stopTTS()">Stop</button>
+          </div>
+        </div>
+        <div class="speech-card">
+          <h4>🎤 Speech to Text — Bicara, jadikan teks</h4>
+          <button class="speech-btn btn-record" id="recordBtn" onclick="toggleRecording()">Mulai Rekam</button>
+          <div class="result-text" id="sttResult">Tekan tombol dan mulai bicara...</div>
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <button class="speech-btn" style="background:#1FA3B8;color:white;" onclick="addSTTToSentence()">Tambah ke Kalimat</button>
+            <button class="speech-btn" style="background:#fca5a5;color:#7f1d1d;" onclick="clearSTT()">Hapus</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <button class="close-btn" onclick="closeDetail()">✕ Tutup</button>
+  <div class="detail-letter" id="detailLetter">A</div>
+  <img class="detail-img" id="detailImg" src="" alt="">
+  <div>
+    <div class="detail-title">Cara membaca huruf ini:</div>
+    <p style="font-size:13px;color:#718096;line-height:1.6;" id="detailDesc">Bentuk tangan untuk huruf ini.</p>
+  </div>
+  <button class="detail-btn btn-speak" onclick="speakLetter()">Ucapkan Huruf</button>
+  <button class="detail-btn btn-latihan" onclick="showSection('latihan', document.querySelector('.tab:nth-child(4))'))">🎯 Latihan Sekarang</button>
+</div>
+
+<!-- CHATBOT -->
+<div class="chat-bubble">
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div><h4>ISYARA AI Assistant</h4><p>Tanya apa saja tentang BISINDO!</p></div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg bot">Halo! Saya AI Assistant ISYARA Mau mulai dari mana?</div>
+    </div>
+    <div class="chat-actions">
+      <button class="quick-btn" onclick="quickAsk('Apa itu BISINDO?')">Apa itu BISINDO?</button>
+      <button class="quick-btn" onclick="getAIFeedback()">Feedback</button>
+      <button class="quick-btn" onclick="getRekomendasi()">Rekomendasi</button>
+      <button class="quick-btn" onclick="quickAsk('Tips belajar bahasa isyarat')">Tips Belajar</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chatInput" placeholder="Ketik pertanyaan..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()" id="chatToggle">🤖</button>
+</div>
+
+<script>
+// ── DATA ──
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+const hijaiyah = [
+  {label: 'ا', nama: 'alif'},
+  {label: 'ب', nama: 'ba'},
+  {label: 'ت', nama: 'ta'},
+  {label: 'ث', nama: 'tsa'},
+  {label: 'ج', nama: 'jim'},
+  {label: 'ح', nama: 'ha'},
+  {label: 'خ', nama: 'kho'},
+  {label: 'د', nama: 'dal'},
+  {label: 'ذ', nama: 'dzal'},
+  {label: 'ر', nama: 'ro'},
+  {label: 'ز', nama: 'zai'},
+  {label: 'س', nama: 'sin'},
+  {label: 'ش', nama: 'syin'},
+  {label: 'ص', nama: 'sho'},
+  {label: 'ض', nama: 'dhod'},
+  {label: 'ط', nama: 'tho'},
+  {label: 'ظ', nama: 'zho'},
+  {label: 'ع', nama: 'ain'},
+  {label: 'غ', nama: 'ghain'},
+  {label: 'ف', nama: 'fa'},
+  {label: 'ق', nama: 'qof'},
+  {label: 'ك', nama: 'kaf'},
+  {label: 'ل', nama: 'lam'},
+  {label: 'م', nama: 'mim'},
+  {label: 'ن', nama: 'nun'},
+  {label: 'ه', nama: 'ha2'},
+  {label: 'و', nama: 'wau'},
+  {label: 'ال', nama: 'lam alif'},
+  {label: 'ء', nama: 'hamzah'},
+  {label: 'ي', nama: 'ya'},
+
+
+];
+
+// ── STATE ──
+let selectedLetter = '';
+let recognition = null;
+let isRecording = false;
+let sttRecognition = null;
+let isSTTRecording = false;
+let deteksiStarted = false;
+let synth = window.speechSynthesis;
+
+// ── TABS ──
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name + 'Section').classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'latihan') startDeteksi();
+}
+
+// ── BUILD GRIDS ──
+function buildGrid() {
+  const grid = document.getElementById('alphabetGrid');
+  letters.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'letter-card';
+    card.innerHTML = `
+      <button class="speak-btn" onclick="event.stopPropagation();speakText('${l}')">🔊</button>
+      <img src="/static/images/bisindo/${l.toLowerCase()}.png" alt="BISINDO ${l}" onerror="this.style.display='none'">
+      <div class="letter-label">${l}</div>
+    `;
+    card.onclick = function() {
+      selectedLetter = l;
+      document.getElementById('detailLetter').textContent = l;
+      document.getElementById('detailImg').src = `/static/images/bisindo/${l.toLowerCase()}.png`;
+      document.getElementById('detailDesc').textContent = `Ini adalah huruf ${l} dalam BISINDO. Perhatikan posisi jari dan bentuk tangan dengan teliti.`;
+      document.getElementById('detailPanel').classList.add('open');
+      document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    };
+    grid.appendChild(card);
+  });
+}
+
+function buildAngkaGrid() {
+  const grid = document.getElementById('angkaGrid');
+  Array.from({length: 10}, (_, i) => String(i + 1)).forEach(n => {
+    const card = document.createElement('div');
+    card.className = 'letter-card';
+    card.innerHTML = `
+      <button class="speak-btn" onclick="event.stopPropagation();speakText('${n}')">🔊</button>
+      <img src="/static/images/angka/${n}.png" alt="Angka ${n}" onerror="this.style.display='none'">
+      <div class="letter-label">${n}</div>
+    `;
+    card.onclick = function() {
+      selectedLetter = n;
+      document.getElementById('detailLetter').textContent = n;
+      document.getElementById('detailImg').src = `/static/images/angka/${n}.png`;
+      document.getElementById('detailDesc').textContent = `Ini adalah angka ${n} dalam BISINDO.`;
+      document.getElementById('detailPanel').classList.add('open');
+    };
+    grid.appendChild(card);
+  });
+}
+
+function buildHijaiyahGrid() {
+  const grid = document.getElementById('hijaiyahGrid');
+  hijaiyah.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'letter-card';
+    card.innerHTML = `
+      <button class="speak-btn" onclick="event.stopPropagation();speakText('${h.nama}')">🔊</button>
+      <img src="/static/images/hijaiyah/${h.nama}.png" alt="${h.nama}" onerror="this.style.display='none'">
+      <div class="letter-label" style="font-size:28px;">${h.label}</div>
+      <div style="font-size:11px;color:#718096;margin-top:4px;">${h.nama}</div>
+    `;
+    card.onclick = function() {
+      selectedLetter = h.nama;
+      document.getElementById('detailLetter').textContent = h.label;
+      document.getElementById('detailImg').src = `/static/images/hijaiyah/${h.nama}.png`;
+      document.getElementById('detailDesc').textContent = `Ini adalah huruf ${h.nama} (${h.label}) dalam huruf Hijaiyah.`;
+      document.getElementById('detailPanel').classList.add('open');
+    };
+    grid.appendChild(card);
+  });
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.querySelectorAll('.letter-card').forEach(c => c.classList.remove('active'));
+}
+
+function speakLetter() { speakText(selectedLetter); }
+
+// ── TTS ──
+function speakText(text) {
+  synth.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'id-ID';
+  utt.rate = 0.9;
+  const voices = synth.getVoices();
+  const indoVoice = voices.find(v => v.lang === 'id-ID' || v.lang.includes('id'));
+  if (indoVoice) utt.voice = indoVoice;
+  synth.speak(utt);
+}
+speechSynthesis.onvoiceschanged = () => synth.getVoices();
+
+function speakSentence() {
+  const text = document.getElementById('sentenceText').textContent;
+  if (text && text !== '_') speakText(text);
+}
+function playTTS() {
+  const text = document.getElementById('ttsInput').value;
+  if (text) speakText(text);
+}
+function stopTTS() { synth.cancel(); }
+
+// ── DETEKSI ──
+function startDeteksi() {
+  if (deteksiStarted) return;
+  deteksiStarted = true;
+  setInterval(() => {
+    fetch('/state').then(r => r.json()).then(data => {
+      document.getElementById('gestureBadge').textContent = data.gesture ? `${data.gesture} (${data.confidence}%)` : 'Mendeteksi...';
+      document.getElementById('currentGesture').textContent = data.gesture || '-';
+      document.getElementById('sentenceText').textContent = data.sentence || '_';
+      const h = document.getElementById('historyLetters');
+      h.innerHTML = '';
+      data.history.forEach(l => {
+        const c = document.createElement('div');
+        c.className = 'chip';
+        c.textContent = l;
+        h.appendChild(c);
+      });
+    });
+  }, 300);
+}
+
+function setMode(mode) {
+  fetch(`/set_mode/${mode}`)
+    .then(r => r.json())
+    .then(() => {
+      document.getElementById('btnAlfabet').classList.toggle('active', mode === 'alfabet');
+      document.getElementById('btnAngka').classList.toggle('active', mode === 'angka');
+      // Reset tampilan
+      document.getElementById('sentenceText').textContent = '_';
+      document.getElementById('currentGesture').textContent = '-';
+      document.getElementById('historyLetters').innerHTML = '';
+      document.getElementById('gestureBadge').textContent = 'Mendeteksi...';
+    });
+}
+
+// ── MIC ──
+function toggleMic() {
+  if (!isRecording) startMic(); else stopMic();
+}
+function startMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Gunakan Chrome!'); return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'id-ID';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.onresult = (e) => {
+    fetch('/add_text', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text: e.results[0][0].transcript}) });
+  };
+  recognition.onend = () => stopMic();
+  recognition.start();
+  isRecording = true;
+  document.getElementById('micBtn').classList.add('listening');
+  document.getElementById('micBtn').textContent = 'Merekam...';
+}
+function stopMic() {
+  if (recognition) recognition.stop();
+  isRecording = false;
+  document.getElementById('micBtn').classList.remove('listening');
+  document.getElementById('micBtn').innerHTML = '🎤 Mikrofon';
+}
+
+// ── STT ──
+function toggleRecording() {
+  if (!isSTTRecording) startSTT(); else stopSTT();
+}
+function startSTT() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Gunakan Chrome!'); return; }
+  sttRecognition = new SR();
+  sttRecognition.lang = 'id-ID';
+  sttRecognition.continuous = true;
+  sttRecognition.interimResults = true;
+  sttRecognition.onresult = (e) => {
+    let t = '';
+    for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+    document.getElementById('sttResult').textContent = t;
+  };
+  sttRecognition.onend = () => stopSTT();
+  sttRecognition.start();
+  isSTTRecording = true;
+  const btn = document.getElementById('recordBtn');
+  btn.classList.add('active');
+  btn.textContent = '🔴 Merekam... (klik stop)';
+}
+function stopSTT() {
+  if (sttRecognition) sttRecognition.stop();
+  isSTTRecording = false;
+  const btn = document.getElementById('recordBtn');
+  btn.classList.remove('active');
+  btn.textContent = '🎤 Mulai Rekam';
+}
+function addSTTToSentence() {
+  const text = document.getElementById('sttResult').textContent;
+  if (text && text !== 'Tekan tombol dan mulai bicara...') {
+    fetch('/add_text', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({text: text}) });
+  }
+}
+function clearSTT() { document.getElementById('sttResult').textContent = 'Tekan tombol dan mulai bicara...'; }
+function clearSentence() { fetch('/clear_sentence'); }
+function backspace() { fetch('/backspace'); }
+
+// ── CHATBOT ──
+function toggleChat() {
+  const win = document.getElementById('chatWindow');
+  win.classList.toggle('open');
+  document.getElementById('chatToggle').textContent = win.classList.contains('open') ? '✕' : '🤖';
+}
+function addMsg(text, type) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+function quickAsk(text) { document.getElementById('chatInput').value = text; sendChat(); }
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  addMsg(msg, 'user');
+  input.value = '';
+  const loading = addMsg('Sedang berpikir...', 'loading');
+  const gesture = document.getElementById('currentGesture')?.textContent || '';
+  const sentence = document.getElementById('sentenceText')?.textContent || '';
+  fetch('/chat', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: msg, gesture, sentence}) })
+    .then(r => r.json()).then(data => { loading.remove(); addMsg(data.reply, 'bot'); })
+    .catch(() => { loading.remove(); addMsg('Maaf, terjadi kesalahan!', 'bot'); });
+}
+function getAIFeedback() {
+  const gesture = document.getElementById('currentGesture')?.textContent || '';
+  if (!gesture || gesture === '-') { addMsg('Tunjukkan gesture dulu ke kamera!', 'bot'); document.getElementById('chatWindow').classList.add('open'); return; }
+  const sentence = document.getElementById('sentenceText')?.textContent || '';
+  const confidence = document.getElementById('gestureBadge')?.textContent?.match(/\d+/)?.[0] || '0';
+  const loading = addMsg('Menganalisis gesture...', 'loading');
+  document.getElementById('chatWindow').classList.add('open');
+  fetch('/ai_feedback', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({gesture, confidence, sentence}) })
+    .then(r => r.json()).then(data => { loading.remove(); addMsg(data.feedback, 'bot'); });
+}
+function getRekomendasi() {
+  const sentence = document.getElementById('sentenceText')?.textContent || '';
+  const history = Array.from(document.querySelectorAll('.chip')).map(c => c.textContent);
+  const loading = addMsg('Membuat rekomendasi...', 'loading');
+  document.getElementById('chatWindow').classList.add('open');
+  fetch('/ai_rekomendasi', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({history, sentence}) })
+    .then(r => r.json()).then(data => { loading.remove(); addMsg(data.rekomendasi, 'bot'); });
+}
+
+// ── INIT ──
+buildGrid();
+buildAngkaGrid();
+buildHijaiyahGrid();
+</script>
+</body>
+</html>

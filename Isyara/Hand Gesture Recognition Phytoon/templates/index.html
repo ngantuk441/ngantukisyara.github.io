@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISYARA - Platform Pembelajaran Bahasa Isyarat Berbasis AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="shortcut icon" href="{{ url_for('static', filename='images/lidm.bg.png') }}" type="image/x-icon">
+<style>
+  :root {
+    --primary: #1FA3B8;
+    --primary-light: #0CB1A0;
+    --accent: #1FA3B8;
+    --accent-soft: #1FA3B8;
+    --dark: #A4F9F0;
+    --text: #1E6773;
+    --text-muted: #718096;
+    --bg: #F8F9FF;
+    --white: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --border: #E8ECFF;
+    --gradient: linear-gradient(135deg, #1FA3B8 0%, #6da0af 100%);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+  /* NAVBAR */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 80px; height: 72px;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 24px rgba(59,219,152,0.07);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 26px; font-weight: 900;
+    color: var(--primary); letter-spacing: -0.5px; text-decoration: none;
+  }
+  .nav-logo .logo-icon {
+    width: 42px; height: 42px; background: var(--white);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+  .nav-links a {
+    text-decoration: none; color: var(--text); font-size: 15px; font-weight: 500;
+    padding: 8px 16px; border-radius: 8px; transition: all 0.2s;
+  }
+  .nav-links a:hover { background: var(--border); color: var(--primary); }
+  .nav-links a.active { background: var(--border); color: var(--primary); font-weight: 700; }
+  .nav-login {
+    background: var(--gradient) !important; color: white !important;
+    padding: 8px 22px !important; border-radius: 10px !important; font-weight: 700 !important;
+    box-shadow: 0 4px 14px rgba(59,219,192,0.3);
+  }
+  .nav-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,219,128,0.4) !important; }
+
+  /* HERO */
+  #beranda {
+    min-height: 100vh; padding: 120px 80px 80px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    align-items: center; position: relative; overflow: hidden;
+  }
+  .hero-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; pointer-events: none; }
+  .hero-blob-1 { width: 500px; height: 500px; background: #0CB1A0; top: -100px; right: -100px; }
+  .hero-blob-2 { width: 350px; height: 350px; background: #1fa3b8; bottom: 0; left: 10%; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--primary-soft); color: var(--accent);
+    padding: 6px 16px; border-radius: 100px; font-size: 13px; font-weight: 700;
+    margin-bottom: 24px; letter-spacing: 0.5px;
+  }
+  .hero-title {
+    font-family: 'Nunito', sans-serif; font-size: 52px; font-weight: 900;
+    line-height: 1.1; color: #1e6773; margin-bottom: 20px; letter-spacing: -1px;
+  }
+  .hero-title span { color: var(--primary); }
+  .hero-subtitle { font-size: 17px; line-height: 1.7; color: var(--text-muted); margin-bottom: 40px; max-width: 500px; }
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px; }
+  .btn-primary {
+    background: var(--gradient); color: white; padding: 14px 32px;
+    border-radius: 12px; font-size: 16px; font-weight: 700; border: none; cursor: pointer;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 8px 24px rgba(59,219,144,0.35); transition: all 0.25s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(59,91,219,0.45); }
+  .btn-secondary {
+    background: white; color: var(--primary); padding: 14px 32px;
+    border-radius: 12px; font-size: 16px; font-weight: 700;
+    border: 2px solid var(--border); cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px; transition: all 0.25s;
+  }
+  .btn-secondary:hover { border-color: var(--primary-light); background: #F0F4FF; transform: translateY(-2px); }
+  .hero-stats { display: flex; gap: 32px; }
+  .stat { text-align: center; }
+  .stat-number { font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 900; color: var(--primary); }
+  .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+  /* Hero visual */
+  .hero-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+  .phone-mockup {
+    width: 280px; background: var(--dark); border-radius: 40px; padding: 16px;
+    box-shadow: 0 40px 80px rgba(26,46,31,0.35), 0 0 0 2px rgba(255,255,255,0.1);
+    position: relative; z-index: 2; animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+  .phone-screen {
+    background: linear-gradient(160deg, hsl(183, 46%, 59%) 0%, #ffffff 100%);
+    border-radius: 28px; height: 520px; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; position: relative;
+  }
+  .hand-sign { width: 240px; height: 240px; object-fit: contain; background: transparent; display: block; animation: pulse 2s ease-in-out infinite;
+}
+  @keyframes pulse { 0%,0% { transform: scale(1); } 0% { transform: scale(1.08); } }
+  .ai-scan {
+    width: 0px; height: 0px; 
+    position: absolute; animation: scan 5s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0%,100% { border-color: rgba(115, 252, 170, 0); box-shadow: 0 0 20px rgba(115, 252, 161, 0); }
+    50% { border-color: rgba(115, 252, 133, 0); box-shadow: 0 0 30px rgba(115, 252, 179, 0); }
+  }
+  .scan-corner { position: absolute; width: 20px; height: 20px; border-color: var(--primary-light); border-style: solid; }
+  .scan-corner.tl { top: -2px; left: -2px; border-width: 3px 0 0 3px; border-radius: 6px 0 0 0; }
+  .scan-corner.tr { top: -2px; right: -2px; border-width: 3px 3px 0 0; border-radius: 0 6px 0 0; }
+  .scan-corner.bl { bottom: -2px; left: -2px; border-width: 0 0 3px 3px; border-radius: 0 0 0 6px; }
+  .scan-corner.br { bottom: -2px; right: -2px; border-width: 0 3px 3px 0; border-radius: 0 0 6px 0; }
+  .phone-label { font-size: 13px; font-weight: 700; color: var(--primary-light); letter-spacing: 2px; text-transform: uppercase; }
+  .phone-result {
+    background: rgba(115, 252, 170, 0); border: 1px solid rgba(115, 252, 204, 0);
+    padding: 8px 20px; border-radius: 20px; font-size: 24px; font-weight: 900;
+    color: white; font-family: 'Nunito', sans-serif;
+  }
+  .floating-card {
+    position: absolute; background: white; border-radius: 16px; padding: 12px 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12); display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; z-index: 3; animation: float 4s ease-in-out infinite;
+  }
+  .floating-card.card-1 { top: 40px; right: -30px; animation-delay: -1s; }
+  .floating-card.card-2 { bottom: 80px; left: -40px; animation-delay: -2s; }
+  .floating-card .card-icon { font-size: 22px; }
+  .floating-card .card-text { color: var(--text); }
+  .floating-card .card-sub { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+  /* FEATURES */
+  .section-header { text-align: center; margin-bottom: 60px; }
+  .section-badge {
+    display: inline-flex; align-items: center; gap: 8px; background: #EEF2FF;
+    color: var(--primary); padding: 6px 16px; border-radius: 100px;
+    font-size: 13px; font-weight: 700; margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Nunito', sans-serif; font-size: 40px; font-weight: 900;
+    color: #1E3A4A; margin-bottom: 14px; letter-spacing: -0.5px;
+  }
+  .section-subtitle { font-size: 17px; color: var(--text); max-width: 680px; margin: 0 auto; line-height: 1.7; }
+  #features { padding: 100px 80px; background: #1fa3b8; min-height: 100vh;}
+  .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; margin-top: 150px;}
+  .feature-card {
+    background: var(--bg); border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 32px; transition: all 0.3s; cursor: pointer;
+  }
+  .feature-card:hover {
+    border-color: var(--primary-light); background: white;
+    transform: translateY(-6px); box-shadow: 0 20px 48px rgba(59,91,219,0.12);
+  }
+  .feature-icon-wrap {
+    width: 64px; height: 64px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 20px;
+  }
+  .feature-card:nth-child(1) .feature-icon-wrap { background: #EEF2FF; }
+  .feature-card:nth-child(2) .feature-icon-wrap { background: #FFF3E0; }
+  .feature-card:nth-child(3) .feature-icon-wrap { background: #E8F5E9; }
+  .feature-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: #1E3A4A; margin-bottom: 10px; }
+  .feature-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px; }
+  .feature-link { color: var(--primary); font-size: 14px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: gap 0.2s; }
+  .feature-link:hover { gap: 10px; }
+
+  /* PEMBELAJARAN */
+  #pembelajaran { padding: 100px 80px; min-height: 100vh; background: #white; }
+  .pembelajaran-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 25px; margin-top: 150px; }
+  .pembelajaran-card {
+    background: #ffffff; border: 1.5px solid var(--primary); border-radius: 24px; padding: 36px;
+    display: flex; gap: 24px; align-items: flex-start; transition: all 0.3s; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .pembelajaran-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--gradient); transform: scaleX(0); transition: transform 0.3s; transform-origin: left;
+  }
+  .pembelajaran-card:hover::before { transform: scaleX(1); }
+  .pembelajaran-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(59,91,219,0.1); border-color: var(--primary-light); }
+  .pcard-icon { min-width: 72px; height: 72px; border-radius: 18px; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 34px; }
+  .pcard-title { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; color: #1fa3b8; margin-bottom: 10px; }
+  .pcard-desc { font-size: 14px; color: #1fa3b8; line-height: 1.7; margin-bottom: 16px; }
+
+  /* KAMUS */
+  #kamus {
+    padding: 100px 80px;
+    background:radial-gradient(ellipse at 20% 50%, rgba(59, 219, 102, 0.2) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(65, 217, 116, 0.2) 0%, transparent 20%);
+    color: white; position: relative; overflow: hidden;
+  }
+  #kamus::before {
+    content: ''; position: absolute; inset: 0;
+    background: #1fa3b8;
+  }
+  #kamus .section-badge { background: rgba(37, 180, 142, 0.34); color: var(--white); }
+  #kamus .section-title { color: white; }
+  #kamus .section-subtitle { color: rgba(255,255,255,0.6); }
+  .kamus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; position: relative; z-index: 1; }
+  .kamus-card {
+    background: rgba(18, 130, 111, 0.06); border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 28px; padding: 48px 36px; text-align: center; transition: all 0.3s;
+    cursor: pointer; backdrop-filter: blur(10px);
+  }
+  .kamus-card:hover { background: rgba(255,255,255,0.1); border-color: rgba(115,252,117,0.4); transform: translateY(-8px); box-shadow: 0 24px 60px rgba(0,0,0,0.3); }
+  .kamus-display { font-size: 110px; margin-bottom: 20px; display: block; line-height: 1; color: white; }
+  .kamus-title { font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 900; color: white; margin-bottom: 12px; letter-spacing: 4px; }
+  .kamus-desc { font-size: 15px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 24px; }
+  .kamus-btn {
+    display: inline-flex; align-items: center; gap: 8px; background: var(--white);
+    color: #1E3A4A; padding: 12px 28px; border-radius: 12px; font-size: 15px; font-weight: 700;
+    text-decoration: none; border: none; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(59,219,150,0.4); transition: all 0.25s;
+  }
+  .kamus-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(59,219,107,0.5); }
+
+  /* DETEKSI */
+  #deteksi { padding: 80px 80px; background: #ffffff; }
+  .deteksi-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+  .deteksi-title { font-family: 'Nunito', sans-serif; font-size: 32px; font-weight: 900; color: #1FA3B8; margin-bottom: 24px; }
+  .cam-box { border-radius: 16px; overflow: hidden; border: 2px solid #979e9a55; position: relative; }
+  .cam-box img { width: 100%; display: block; }
+  .gesture-badge-overlay {
+    position: absolute; top: 15px; left: 15px;
+    background: rgba(250, 250, 250, 0.61); border: 1px solid #9cd3c77d;
+    border-radius: 50px; padding: 8px 20px; color: #dbdbdb; font-size: 1rem;
+  }
+  .kalimat-box { background: #1fa4b84d; border-radius: 16px; padding: 24px; border: 2px solid #0f604100; margin-top: 16px; }
+  .kalimat-label { color: #1fa3b8; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 12px; }
+  .kalimat-text { font-size: 2rem; font-weight: bold; color: #0e6876; letter-spacing: 4px; min-height: 50px; }
+  .kalimat-btns { display: flex; gap: 10px; margin-top: 14px; }
+  .btn-hapus { padding: 10px 20px; background: #11bbb287; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+  .btn-reset { padding: 10px 20px; background: #11b8bb6c; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+  .info-right { display: flex; flex-direction: column; gap: 16px; }
+  .info-card { background: #1fa4b863; border-radius: 16px; padding: 24px; border: 2px solid #ffffff; }
+  .info-label { color: #1fa3b8; font-size: 0.75rem; letter-spacing: 2px; margin-bottom: 12px; }
+  .gesture-besar { font-size: 3.5rem; font-weight: bold; color: #0e6876; text-align: center; }
+  .history-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  /* FOOTER */
+  footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 60px 80px 40px; }
+  .footer-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 48px; padding-bottom: 48px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .footer-brand .nav-logo { color: white; margin-bottom: 16px; display: flex; }
+  .footer-brand p { font-size: 14px; line-height: 1.7; max-width: 280px; }
+  .footer-links h4 { color: white; font-weight: 700; margin-bottom: 16px; font-size: 15px; }
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-links a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--primary-light); }
+  .footer-bottom { text-align: center; font-size: 13px; }
+
+  /* ANIMASI */
+  .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+  .stagger > * { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
+  .stagger.visible > *:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0s; }
+  .stagger.visible > *:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+  .stagger.visible > *:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.2s; }
+  .stagger.visible > *:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    #beranda { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+    .hero-visual { 
+      display: flex;
+      margin-top: 40px;
+      transform: scale(0.9);
+     }
+    .hero-title { font-size: 36px; }
+    #features, #pembelajaran, #kamus, #deteksi { padding: 80px 24px; }
+    footer { padding: 60px 24px 40px; }
+    .features-grid, .pembelajaran-grid, .kamus-grid, .deteksi-grid { grid-template-columns: 1fr; }
+    .footer-top { flex-direction: column; gap: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="#beranda" class="nav-logo">
+    <img src="{{ url_for('static', filename='images/lidm.bg.png') }}" alt="Logo" style="height:40px; width:auto; border-radius:8px;">
+    ISYARA
+  </a>
+  <ul class="nav-links">
+    <li><a href="#beranda" class="active">Beranda</a></li>
+    <li><a href="#features">Tentang Kami</a></li>
+    <li><a href="#pembelajaran">Fitur Unggulan</a></li>
+    <li><a href="#kamus">Pembelajaran</a></li>
+
+    {% if user %}
+    <li><a href="/dashboard" style="font-weight: 700; color: #1fa3b8;">Dashboard</a></li>
+    <li><a href="/logout" class="nav-login" style="background: #fee2e2; color: #c53030;">Keluar</a></li>
+    
+    {% else %}
+    <li><a href="/login" class="nav-login">Login</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="beranda">
+  <div class="hero-blob hero-blob-1"></div>
+  <div class="hero-blob hero-blob-2"></div>
+  <div class="hero-content fade-in">
+    <div class="hero-badge">Website Pembelajaran Bahasa Isyarat</div>
+    <h1 class="hero-title">
+      Bahasa Isyarat<br>
+      Lebih Mudah,<br>
+      <span>Lebih Menyenangkan</span>
+    </h1>
+    <p class="hero-subtitle">
+      Platform pembelajaran SIBI/BISINDO berbasis AI untuk siswa sekolah dasar. Latihan langsung dengan kamera, umpan balik real-time, dan sistem gamifikasi yang bikin semangat!
+    </p>
+    <div class="hero-actions">
+      <a href="#deteksi" class="btn-primary" onclick="bukaDeteksi()">Mulai Latihan</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-number">AI</div><div class="stat-label">Deteksi Real-time</div></div>
+      <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Gratis</div></div>
+    </div>
+  </div>
+  <div class="hero-visual fade-in">
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="phone-label">AI Scan</div>
+        <div style="position:relative; display:flex; align-items:center; justify-content:center;">
+          <div class="ai-scan">
+            <div class="scan-corner tl"></div>
+            <div class="scan-corner tr"></div>
+            <div class="scan-corner bl"></div>
+            <div class="scan-corner br"></div>
+          </div>
+          <div class="phone-screen">
+  <div class="ai-scan">
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+  </div>
+
+  <img class="hand-sign" src="{{ url_for('static', filename='images/maskot.bg.png') }}" alt="Maskot">
+  <div class="phone-result"></div>
+</div>
+      </div>
+    </div>
+    <div class="floating-card card-1">
+      <div>
+        <div class="card-text">Akurasi 98%</div>
+        <div class="card-sub">Deteksi gerakan</div>
+      </div>
+    </div>
+    <div class="floating-card card-2">
+      <div>
+        <div class="card-text">+250 XP</div>
+        <div class="card-sub">Level naik!</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-header fade-in">
+    <div class="section-badge">Mengapa ISYARA?</div>
+    <h2 class="section-title">Platform Interaktif<br>untuk Semua Kalangan</h2>
+    <p class="section-subtitle">Platform pembelajaran SIBI/BISINDO berbasis AI untuk siswa sekolah dasar. Latihan langsung dengan kamera, umpan balik real-time, dan sistem gamifikasi yang bikin semangat!</p>
+  </div>
+  <div class="features-grid stagger">
+    <div class="feature-card">
+      <div class="feature-icon-wrap">🌐</div>
+      <h3 class="feature-title">Akses Mudah</h3>
+      <p class="feature-desc">Game pembelajaran terpadu yang bisa dimainkan setiap hari dengan tantangan dan misi seru.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap">⚡</div>
+      <h3 class="feature-title">Fitur Lengkap</h3>
+      <p class="feature-desc">Tulisan menjadi suara dan sebaliknya untuk mendukung komunikasi 2 arah yang inklusif.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon-wrap">🎮</div>
+      <h3 class="feature-title">Seru & Interaktif</h3>
+      <p class="feature-desc">Kamus Bahasa isyarat aktif lengkap untuk pembelajaran yang menyenangkan dan efektif.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PEMBELAJARAN -->
+<section id="pembelajaran">
+  <div class="section-header fade-in">
+    <h2 class="section-title">Fitur-Fitur Unggulan</h2>
+    <p class="section-subtitle">Fitur-fitur yang dapat kalian coba, mulai dari materi yang mudah dipahami, game, kamus, hingga evaluasi untuk mengecek seberapa paham kamu!</p>
+  </div>
+  <div class="pembelajaran-grid stagger">
+    <div class="pembelajaran-card">
+      <div>
+        <div class="pcard-icon">📚</div>
+        <h3 class="pcard-title">Materi Pembelajaran Bahasa Isyarat</h3>
+        <p class="pcard-desc">Pelajari 26 Huruf Alfabet, Angka, Hijaiyah dalam bahasa isyarat Indonesia lengkap dengan Panduan visual.</p>
+      </div>
+    </div>
+    <div class="pembelajaran-card">
+  <div>
+    <div class="pcard-icon">🕹️</div>
+    <h3 class="pcard-title">Permainan Isyarat</h3>
+    <p class="pcard-desc">Latihan berbasis game dengan tantangan dan misi seru untuk mengasah kemampuan isyaratmu.</p>
+  </div>
+</div>
+    <div class="pembelajaran-card">
+      <div>
+        <div class="pcard-icon">📈</div>
+        <h3 class="pcard-title">Progres Belajar</h3>
+        <p class="pcard-desc">Lihat perkembangan belajarmu melalui grafik dan laporan harian yang mudah dipahami.</p>
+      </div>
+    </div>
+    <div class="pembelajaran-card">
+      <div>
+        <div class="pcard-icon">🤖</div>
+        <h3 class="pcard-title">Evaluasi AI</h3>
+        <p class="pcard-desc">AI mendeteksi gerakanmu secara real-time dan memberikan koreksi langsung agar kamu belajar dengan benar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KAMUS -->
+<section id="kamus">
+  <div class="section-header fade-in" style="position:relative;z-index:1;">
+    <div class="section-badge">Kamus Isyarat</div>
+    <h2 class="section-title">Pilih Kategori<br>yang Ingin Dipelajari</h2>
+    <p class="section-subtitle">Teknologi AI membuatnya sangat mudah untuk siapapun, tanpa pengalaman sebelumnya.</p>
+  </div>
+  <div class="kamus-grid stagger">
+    <div class="kamus-card">
+      <span class="kamus-display">🖐️</span>
+      <h3 class="kamus-title">ALFABET</h3>
+      <p class="kamus-desc">Pelajari 26 huruf A–Z dalam bahasa isyarat Indonesia (SIBI) dengan animasi panduan gerakan tangan interaktif.</p>
+      <a href="kamus" class="kamus-btn">Buka</a>
+    </div>
+    <div class="kamus-card">
+      <span class="kamus-display">✌️</span>
+      <h3 class="kamus-title">ANGKA</h3>
+      <p class="kamus-desc">Kuasai angka dan kombinasi bilangan dalam bahasa isyarat untuk komunikasi sehari-hari yang lebih lancar.</p>
+      <a href="kamus" class="kamus-btn">Buka</a>
+    </div>
+    <div class="kamus-card">
+      <span class="kamus-display">ب</span>
+      <h3 class="kamus-title">Hijaiyah</h3>
+      <p class="kamus-desc">Pelajari dan kuasai huruf Hijaiah supaya kamu lancar mengaji dan mendapat pahala.</p>
+      <a href="kamus" class="kamus-btn">Buka</a>
+    </div>
+    <div class="kamus-card">
+      <span class="kamus-display">🧊</span>
+      <h3 class="kamus-title">Bangunn Ruang</h3>
+      <p class="kamus-desc">Kuasai angka dan kombinasi bilangan dalam bahasa isyarat untuk komunikasi sehari-hari yang lebih lancar.</p>
+      <a href="game" class="kamus-btn">Buka</a>
+    </div>
+  </div>
+</section>
+
+<!-- DETEKSI KAMERA -->
+<section id="deteksi" style="display:none;">
+  <div class="deteksi-grid">
+    <div>
+      <h2 class="deteksi-title"> Deteksi Bahasa Isyarat</h2>
+      <div class="cam-box">
+        <img src="/video_feed" alt="Kamera">
+        <div class="gesture-badge-overlay" id="gestureBadge">Mendeteksi...</div>
+      </div>
+      <div class="kalimat-box">
+        <div class="kalimat-label">KALIMAT TERBENTUK</div>
+        <div class="kalimat-text" id="sentenceText">_</div>
+        <div class="kalimat-btns">
+          <button class="btn-hapus" onclick="backspace()">⌫ Hapus Huruf</button>
+          <button class="btn-reset" onclick="clearSentence()">Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="info-right">
+      <div class="info-card" style="text-align:center;">
+        <div class="info-label">GESTURE TERDETEKSI</div>
+        <div class="gesture-besar" id="currentGesture">-</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">RIWAYAT HURUF</div>
+        <div class="history-chips" id="historyLetters"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="nav-logo" style="color:white;margin-bottom:16px;">
+       <img class="logo-icon" src="{{ url_for('static', filename='images/lidm.bg.png') }}" alt="Logo">
+        ISYARA
+      </div>
+      <p>Platform pembelajaran bahasa isyarat Indonesia berbasis AI, untuk mewujudkan komunikasi yang inklusif bagi semua.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Fitur</h4>
+      <ul>
+        <li><a href="#deteksi" onclick="bukaDeteksi()">Materi Alfabet</a></li>
+        <li><a href="#">Permainan</a></li>
+        <li><a href="#deteksi" onclick="bukaDeteksi()">Evaluasi AI</a></li>
+        <li><a href="#">Progres Belajar</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Kontak</h4>
+      <ul>
+        <li><a href="https://mail.google.com/mail/u/0/#inbox">timlidmngantuk@gmail.com</a></li>
+        <li><a href="instagram.com">Instagram</a></li>
+        <li><a href="youtube.com">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2026 ISYARA. Dibuat dengan tim lidm ngantuk.
+  </div>
+</footer>
+
+<script>
+  // Smooth active nav
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => observer.observe(s));
+
+  // Scroll fade-in
+  const fadeEls = document.querySelectorAll('.fade-in, .stagger');
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  fadeEls.forEach(el => fadeObserver.observe(el));
+
+  // Deteksi kamera
+  let deteksiAktif = false;
+
+  function bukaDeteksi() {
+    const sec = document.getElementById('deteksi');
+    sec.style.display = 'block';
+    setTimeout(() => sec.scrollIntoView({ behavior: 'smooth' }), 100);
+    if (!deteksiAktif) {
+      deteksiAktif = true;
+      startDeteksi();
+    }
+  }
+
+  function startDeteksi() {
+    setInterval(() => {
+      fetch('/state').then(r => r.json()).then(data => {
+        document.getElementById('gestureBadge').textContent =
+          data.gesture ? `${data.gesture} (${data.confidence}%)` : 'Mendeteksi...';
+        document.getElementById('currentGesture').textContent = data.gesture || '-';
+        document.getElementById('sentenceText').textContent = data.sentence || '_';
+        const h = document.getElementById('historyLetters');
+        h.innerHTML = '';
+        data.history.forEach(l => {
+          const c = document.createElement('div');
+          c.textContent = l;
+          c.style.cssText = 'background:linear-gradient(135deg,#7b2ff7,#00d4ff);border-radius:8px;padding:8px 14px;font-size:1.1rem;font-weight:bold;color:white;';
+          h.appendChild(c);
+        });
+      });
+    }, 300);
+  }
+
+  function clearSentence() { fetch('/clear_sentence'); }
+  function backspace() { fetch('/backspace'); }
+</script>
+<!-- CHATBOT BUBBLE - Tambahkan sebelum </body> di index.html, kamus.html, detect.html -->
+
+<style>
+.chat-bubble {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+}
+.chat-toggle {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #1FA3B8, #6da0af);
+    border-radius: 50%; border: none; cursor: pointer;
+    font-size: 28px; box-shadow: 0 8px 24px rgba(31,163,184,0.4);
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+}
+.chat-toggle:hover { transform: scale(1.1); }
+.chat-window {
+    position: absolute; bottom: 72px; right: 0;
+    width: 340px; height: 480px;
+    background: white; border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+    display: none; flex-direction: column;
+    overflow: hidden; border: 2px solid #e0f7f9;
+}
+.chat-window.open { display: flex; }
+.chat-header {
+    background: linear-gradient(135deg, #1FA3B8, #6da0af);
+    padding: 16px 20px; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.chat-header h4 { font-size: 15px; font-weight: 700; margin: 0; }
+.chat-header p { font-size: 11px; opacity: 0.8; margin: 2px 0 0; }
+.chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+.chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+.msg.bot { background: #e0f7f9; color: #1E6773; align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg.user { background: #1FA3B8; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.loading { background: #e0f7f9; color: #1FA3B8; }
+.chat-actions {
+    padding: 8px 16px; display: flex; gap: 6px; flex-wrap: wrap;
+    border-top: 1px solid #e0f7f9;
+}
+.quick-btn {
+    padding: 5px 10px; background: #e0f7f9; color: #1FA3B8;
+    border: none; border-radius: 20px; font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.quick-btn:hover { background: #1FA3B8; color: white; }
+.chat-input-row {
+    padding: 12px 16px; display: flex; gap: 8px;
+    border-top: 1px solid #e0f7f9;
+}
+.chat-input {
+    flex: 1; padding: 10px 14px; border: 2px solid #e0f7f9;
+    border-radius: 20px; font-size: 13px; outline: none;
+    font-family: inherit;
+}
+.chat-input:focus { border-color: #1FA3B8; }
+.chat-send {
+    width: 38px; height: 38px; background: #1FA3B8; color: white;
+    border: none; border-radius: 50%; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.chat-send:hover { background: #0e6876; }
+.feedback-card {
+    background: #f0fbfc; border: 1px solid #b2ebf2;
+    border-radius: 12px; padding: 12px; margin: 8px 16px;
+    font-size: 12px; color: #1E6773; line-height: 1.5;
+    display: none;
+}
+.feedback-card.show { display: block; }
+.feedback-title { font-weight: 700; color: #1FA3B8; margin-bottom: 4px; font-size: 11px; letter-spacing: 1px; }
+</style>
+
+<div class="chat-bubble">
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div>
+                <h4>ISYARA AI Assistant</h4>
+                <p>Tanya apa saja tentang BISINDO!</p>
+            </div
+            <button class="chat-close" onclick="toggleChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg bot">Halo! Saya AI Assistant ISYARA Saya bisa bantu kamu belajar BISINDO, kasih feedback gesture, dan rekomendasi latihan. Mau mulai dari mana?</div>
+        </div>
+        <div class="feedback-card" id="feedbackCard">
+            <div class="feedback-title">AI FEEDBACK</div>
+            <div id="feedbackText"></div>
+        </div>
+        <div class="chat-actions">
+            <button class="quick-btn" onclick="quickAsk('Apa itu BISINDO?')">Apa itu BISINDO?</button>
+            <button class="quick-btn" onclick="getAIFeedback()">Feedback Gesture</button>
+            <button class="quick-btn" onclick="getRekomendasi()">Rekomendasi</button>
+            <button class="quick-btn" onclick="quickAsk('Tips belajar bahasa isyarat')">Tips Belajar</button>
+        </div>
+        <div class="chat-input-row">
+            <input class="chat-input" id="chatInput" placeholder="Ketik pertanyaan..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+    </div>
+    <button class="chat-toggle" onclick="toggleChat()" id="chatToggle">🤖</button>
+</div>
+
+<script>
+function toggleChat() {
+    const win = document.getElementById('chatWindow');
+    win.classList.toggle('open');
+    document.getElementById('chatToggle').textContent = win.classList.contains('open') ? '✕' : '🤖';
+}
+
+function addMsg(text, type) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+}
+
+function quickAsk(text) {
+    document.getElementById('chatInput').value = text;
+    sendChat();
+}
+
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    addMsg(msg, 'user');
+    input.value = '';
+    const loading = addMsg('Sedang berpikir...', 'loading');
+
+    const gesture = document.getElementById('currentGesture')?.textContent || '';
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+
+    fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg, gesture: gesture, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.reply, 'bot');
+    })
+    .catch(() => {
+        loading.remove();
+        addMsg('Maaf, terjadi kesalahan. Coba lagi!', 'bot');
+    });
+}
+
+function getAIFeedback() {
+    const gesture = document.getElementById('currentGesture')?.textContent || '';
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+    const confidence = document.getElementById('gestureBadge')?.textContent?.match(/\d+/)?.[0] || '0';
+
+    if (!gesture || gesture === '-') {
+        addMsg('Tunjukkan gesture dulu ke kamera ya! 📷', 'bot');
+        document.getElementById('chatWindow').classList.add('open');
+        return;
+    }
+
+    const loading = addMsg('Menganalisis gesture kamu...', 'loading');
+    document.getElementById('chatWindow').classList.add('open');
+
+    fetch('/ai_feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({gesture: gesture, confidence: confidence, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.feedback, 'bot');
+        const card = document.getElementById('feedbackCard');
+        document.getElementById('feedbackText').textContent = data.feedback;
+        card.classList.add('show');
+        setTimeout(() => card.classList.remove('show'), 8000);
+    });
+}
+
+function getRekomendasi() {
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+    const historyContainer = document.getElementById('historyLetters');
+    const history = Array.from(historyContainer.children).map(c => c.textContent);
+
+    const loading = addMsg('Membuat rekomendasi untuk kamu...', 'loading');
+    document.getElementById('chatWindow').classList.add('open');
+
+    fetch('/ai_rekomendasi', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({history: history, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.rekomendasi, 'bot');
+    });
+}
+</script>
+</body>
+</html>

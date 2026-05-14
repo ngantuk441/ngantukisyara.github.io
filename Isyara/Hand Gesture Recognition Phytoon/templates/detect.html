@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISYARA - BISINDO Gesture Recognition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f1a;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid #0f3460;
+        }
+        header h1 { font-size: 2rem; color: #00d4ff; letter-spacing: 3px; }
+        header p { color: #888; font-size: 0.9rem; }
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .camera-section { display: flex; flex-direction: column; gap: 20px; }
+        .camera-box {
+            background: #1a1a2e;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #0f3460;
+            position: relative;
+        }
+        .camera-box img {
+            width: 100%;
+            display: block;
+            border-radius: 14px;
+        }
+        .gesture-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid #00d4ff;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-size: 1.1rem;
+            color: #00d4ff;
+            backdrop-filter: blur(10px);
+        }
+        .confidence-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #111;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            transition: width 0.3s ease;
+        }
+        .sentence-box {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 25px;
+            border: 2px solid #0f3460;
+        }
+        .sentence-box h3 {
+            color: #888;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .sentence-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            min-height: 60px;
+            letter-spacing: 5px;
+            word-break: break-all;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-clear { background: #e74c3c; color: #fff; }
+        .btn-backspace { background: #f39c12; color: #fff; }
+        .btn-clear:hover { background: #c0392b; }
+        .btn-backspace:hover { background: #d68910; }
+        .right-section { display: flex; flex-direction: column; gap: 20px; }
+        .info-box {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 25px;
+            border: 2px solid #0f3460;
+        }
+        .info-box h3 {
+            color: #888;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .current-gesture {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #00d4ff;
+            text-align: center;
+            padding: 20px;
+            text-shadow: 0 0 30px rgba(0,212,255,0.5);
+        }
+        .history-box {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 25px;
+            border: 2px solid #0f3460;
+            flex: 1;
+        }
+        .history-box h3 {
+            color: #888;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        .history-letters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .letter-chip {
+            background: linear-gradient(135deg, #7b2ff7, #00d4ff);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            animation: popIn 0.3s ease;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .gesture-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .gesture-item {
+            background: #0f0f1a;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: #aaa;
+            border: 1px solid #1a1a2e;
+        }
+        .gesture-item.active {
+            border-color: #00d4ff;
+            color: #00d4ff;
+            background: rgba(0,212,255,0.05);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>ISYARA</h1>
+            <p>BISINDO Hand Gesture Recognition</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="camera-section">
+            <div class="camera-box">
+                <img src="/video_feed" alt="Camera Feed">
+                <div class="gesture-badge" id="gestureBadge">Mendeteksi...</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill" style="width:0%"></div>
+                </div>
+            </div>
+
+            <div class="sentence-box">
+                <h3>📝 Kalimat Terbentuk</h3>
+                <div class="sentence-text" id="sentenceText">_</div>
+                <div class="btn-row">
+                    <button class="btn-backspace" onclick="backspace()">⌫ Hapus Huruf</button>
+                    <button class="btn-clear" onclick="clearSentence()">🗑️ Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-section">
+            <div class="info-box">
+                <h3>🖐️ Gesture Terdeteksi</h3>
+                <div class="current-gesture" id="currentGesture">-</div>
+            </div>
+
+            <div class="history-box">
+                <h3>📜 Riwayat Huruf</h3>
+                <div class="history-letters" id="historyLetters"></div>
+            </div>
+
+            <div class="info-box">
+                <h3>🤟 Gesture Tersedia</h3>
+                <div class="gesture-list">
+                    <div class="gesture-item" id="g-Halo">✋ Halo</div>
+                    <div class="gesture-item" id="g-Sip">👍 Sip!</div>
+                    <div class="gesture-item" id="g-OK">👌 OK</div>
+                    <div class="gesture-item" id="g-Peace">✌️ Peace</div>
+                    <div class="gesture-item" id="g-ILoveYou">🤟 I Love You</div>
+                    <div class="gesture-item" id="g-Menunjuk">☝️ Menunjuk</div>
+                    <div class="gesture-item" id="g-Telepon">🤙 Telepon</div>
+                    <div class="gesture-item" id="g-Rock">🤘 Rock!</div>
+                    <div class="gesture-item" id="g-BISINDO">🔤 BISINDO A-Z</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateState() {
+            fetch('/state')
+                .then(r => r.json())
+                .then(data => {
+                    // Update gesture badge
+                    document.getElementById('gestureBadge').textContent =
+                        data.gesture ? `${data.gesture} (${data.confidence}%)` : 'Mendeteksi...';
+
+                    // Update current gesture besar
+                    document.getElementById('currentGesture').textContent =
+                        data.gesture || '-';
+
+                    // Update confidence bar
+                    document.getElementById('confidenceFill').style.width =
+                        data.confidence + '%';
+
+                    // Update kalimat
+                    document.getElementById('sentenceText').textContent =
+                        data.sentence || '_';
+
+                    // Update riwayat huruf
+                    const historyEl = document.getElementById('historyLetters');
+                    historyEl.innerHTML = '';
+                    data.history.forEach(letter => {
+                        const chip = document.createElement('div');
+                        chip.className = 'letter-chip';
+                        chip.textContent = letter;
+                        historyEl.appendChild(chip);
+                    });
+
+                    // Highlight gesture aktif
+                    const gestureMap = {
+                        'Halo': 'g-Halo', 'Sip!': 'g-Sip', 'OK': 'g-OK',
+                        'Peace': 'g-Peace', 'I Love You': 'g-ILoveYou',
+                        'Menunjuk': 'g-Menunjuk', 'Telepon': 'g-Telepon', 'Rock!': 'g-Rock'
+                    };
+                    document.querySelectorAll('.gesture-item').forEach(el => el.classList.remove('active'));
+                    if (gestureMap[data.gesture]) {
+                        document.getElementById(gestureMap[data.gesture])?.classList.add('active');
+                    } else if (data.gesture && data.gesture.length === 1) {
+                        document.getElementById('g-BISINDO')?.classList.add('active');
+                    }
+                });
+        }
+
+        function clearSentence() {
+            fetch('/clear_sentence').then(() => updateState());
+        }
+
+        function backspace() {
+            fetch('/backspace').then(() => updateState());
+        }
+
+        // Update tiap 300ms
+        setInterval(updateState, 300);
+    </script>
+<!-- CHATBOT BUBBLE - Tambahkan sebelum </body> di index.html, kamus.html, detect.html -->
+
+<style>
+.chat-bubble {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+}
+.chat-toggle {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #1FA3B8, #6da0af);
+    border-radius: 50%; border: none; cursor: pointer;
+    font-size: 28px; box-shadow: 0 8px 24px rgba(31,163,184,0.4);
+    transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+}
+.chat-toggle:hover { transform: scale(1.1); }
+.chat-window {
+    position: absolute; bottom: 72px; right: 0;
+    width: 340px; height: 480px;
+    background: white; border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+    display: none; flex-direction: column;
+    overflow: hidden; border: 2px solid #e0f7f9;
+}
+.chat-window.open { display: flex; }
+.chat-header {
+    background: linear-gradient(135deg, #1FA3B8, #6da0af);
+    padding: 16px 20px; color: white;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.chat-header h4 { font-size: 15px; font-weight: 700; margin: 0; }
+.chat-header p { font-size: 11px; opacity: 0.8; margin: 2px 0 0; }
+.chat-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+.chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+}
+.msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+.msg.bot { background: #e0f7f9; color: #1E6773; align-self: flex-start; border-bottom-left-radius: 4px; }
+.msg.user { background: #1FA3B8; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.msg.loading { background: #e0f7f9; color: #1FA3B8; }
+.chat-actions {
+    padding: 8px 16px; display: flex; gap: 6px; flex-wrap: wrap;
+    border-top: 1px solid #e0f7f9;
+}
+.quick-btn {
+    padding: 5px 10px; background: #e0f7f9; color: #1FA3B8;
+    border: none; border-radius: 20px; font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.quick-btn:hover { background: #1FA3B8; color: white; }
+.chat-input-row {
+    padding: 12px 16px; display: flex; gap: 8px;
+    border-top: 1px solid #e0f7f9;
+}
+.chat-input {
+    flex: 1; padding: 10px 14px; border: 2px solid #e0f7f9;
+    border-radius: 20px; font-size: 13px; outline: none;
+    font-family: inherit;
+}
+.chat-input:focus { border-color: #1FA3B8; }
+.chat-send {
+    width: 38px; height: 38px; background: #1FA3B8; color: white;
+    border: none; border-radius: 50%; cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.chat-send:hover { background: #0e6876; }
+.feedback-card {
+    background: #f0fbfc; border: 1px solid #b2ebf2;
+    border-radius: 12px; padding: 12px; margin: 8px 16px;
+    font-size: 12px; color: #1E6773; line-height: 1.5;
+    display: none;
+}
+.feedback-card.show { display: block; }
+.feedback-title { font-weight: 700; color: #1FA3B8; margin-bottom: 4px; font-size: 11px; letter-spacing: 1px; }
+</style>
+
+<div class="chat-bubble">
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div>
+                <h4>🤖 ISYARA AI Assistant</h4>
+                <p>Tanya apa saja tentang BISINDO!</p>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="msg bot">Halo! Saya AI Assistant ISYARA 👋 Saya bisa bantu kamu belajar BISINDO, kasih feedback gesture, dan rekomendasi latihan. Mau mulai dari mana?</div>
+        </div>
+        <div class="feedback-card" id="feedbackCard">
+            <div class="feedback-title">💡 AI FEEDBACK</div>
+            <div id="feedbackText"></div>
+        </div>
+        <div class="chat-actions">
+            <button class="quick-btn" onclick="quickAsk('Apa itu BISINDO?')">Apa itu BISINDO?</button>
+            <button class="quick-btn" onclick="getAIFeedback()">🎯 Feedback Gesture</button>
+            <button class="quick-btn" onclick="getRekomendasi()">💡 Rekomendasi</button>
+            <button class="quick-btn" onclick="quickAsk('Tips belajar bahasa isyarat')">Tips Belajar</button>
+        </div>
+        <div class="chat-input-row">
+            <input class="chat-input" id="chatInput" placeholder="Ketik pertanyaan..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+    </div>
+    <button class="chat-toggle" onclick="toggleChat()" id="chatToggle">🤖</button>
+</div>
+
+<script>
+function toggleChat() {
+    const win = document.getElementById('chatWindow');
+    win.classList.toggle('open');
+    document.getElementById('chatToggle').textContent = win.classList.contains('open') ? '✕' : '🤖';
+}
+
+function addMsg(text, type) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    return div;
+}
+
+function quickAsk(text) {
+    document.getElementById('chatInput').value = text;
+    sendChat();
+}
+
+function sendChat() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    addMsg(msg, 'user');
+    input.value = '';
+    const loading = addMsg('Sedang berpikir...', 'loading');
+
+    const gesture = document.getElementById('currentGesture')?.textContent || '';
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+
+    fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg, gesture: gesture, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.reply, 'bot');
+    })
+    .catch(() => {
+        loading.remove();
+        addMsg('Maaf, terjadi kesalahan. Coba lagi!', 'bot');
+    });
+}
+
+function getAIFeedback() {
+    const gesture = document.getElementById('currentGesture')?.textContent || '';
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+    const confidence = document.getElementById('gestureBadge')?.textContent?.match(/\d+/)?.[0] || '0';
+
+    if (!gesture || gesture === '-') {
+        addMsg('Tunjukkan gesture dulu ke kamera ya! 📷', 'bot');
+        document.getElementById('chatWindow').classList.add('open');
+        return;
+    }
+
+    const loading = addMsg('Menganalisis gesture kamu...', 'loading');
+    document.getElementById('chatWindow').classList.add('open');
+
+    fetch('/ai_feedback', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({gesture: gesture, confidence: confidence, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.feedback, 'bot');
+        const card = document.getElementById('feedbackCard');
+        document.getElementById('feedbackText').textContent = data.feedback;
+        card.classList.add('show');
+        setTimeout(() => card.classList.remove('show'), 8000);
+    });
+}
+
+function getRekomendasi() {
+    const sentence = document.getElementById('sentenceText')?.textContent || '';
+    const chips = document.querySelectorAll('.chip');
+    const history = Array.from(chips).map(c => c.textContent);
+
+    const loading = addMsg('Membuat rekomendasi untuk kamu...', 'loading');
+    document.getElementById('chatWindow').classList.add('open');
+
+    fetch('/ai_rekomendasi', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({history: history, sentence: sentence})
+    })
+    .then(r => r.json())
+    .then(data => {
+        loading.remove();
+        addMsg(data.rekomendasi, 'bot');
+    });
+}
+</script>
+</body>
+</html>
+

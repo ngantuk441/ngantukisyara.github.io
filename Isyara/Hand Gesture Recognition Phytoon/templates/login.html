@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISYARA - Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #e0f7f9 0%, #b2ebf2 50%, #e0f2f1 100%);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .bg-circle {
+    position: absolute; border-radius: 50%;
+    background: rgba(31,163,184,0.1); animation: floatBg 6s ease-in-out infinite;
+  }
+  .bg-circle:nth-child(1) { width: 300px; height: 300px; top: -100px; left: -100px; }
+  .bg-circle:nth-child(2) { width: 200px; height: 200px; bottom: -50px; right: -50px; animation-delay: -2s; }
+  .bg-circle:nth-child(3) { width: 150px; height: 150px; top: 50%; right: 10%; animation-delay: -4s; }
+  @keyframes floatBg { 0%,100%{transform:translateY(0);}50%{transform:translateY(-20px);} }
+
+  .container {
+    background: white; border-radius: 28px; padding: 40px 36px; width: 460px;
+    box-shadow: 0 24px 60px rgba(31,163,184,0.15); position: relative; z-index: 1;
+    animation: slideUp 0.5s ease;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 900;
+    color: #1FA3B8; margin-bottom: 6px; justify-content: center;
+  }
+  .subtitle { text-align: center; color: #718096; font-size: 13px; margin-bottom: 20px; }
+
+  /* ── Role Cards ── */
+  .role-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+  .role-btn {
+    flex: 1; padding: 12px 8px; border: 2px solid #e2e8f0; border-radius: 14px;
+    background: white; cursor: pointer; text-align: center; transition: all 0.2s;
+    font-family: inherit;
+  }
+  .role-btn:hover { transform: translateY(-2px); }
+
+  .role-btn[data-role="siswa"]:hover  { border-color: #1FA3B8; background: #f0fbfc; }
+  .role-btn[data-role="siswa"].active { border-color: #1FA3B8; background: #e0f7f9; box-shadow: 0 4px 16px rgba(31,163,184,0.2); }
+
+  .role-btn[data-role="guru"]:hover  { border-color: #7C3AED; background: #f5f0ff; }
+  .role-btn[data-role="guru"].active { border-color: #7C3AED; background: #EDE9FE; box-shadow: 0 4px 16px rgba(124,58,237,0.2); }
+
+  .role-btn[data-role="admin"]:hover  { border-color: #DC2626; background: #fff5f5; }
+  .role-btn[data-role="admin"].active { border-color: #DC2626; background: #FEE2E2; box-shadow: 0 4px 16px rgba(220,38,38,0.2); }
+
+  .role-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .role-name { font-size: 12px; font-weight: 700; }
+  .role-name-siswa { color: #1E6773; }
+  .role-name-guru  { color: #5B21B6; }
+  .role-name-admin { color: #991B1B; }
+  .role-desc { font-size: 10px; color: #718096; margin-top: 2px; }
+
+  /* Badge */
+  .role-badge {
+    text-align: center; font-size: 12px; font-weight: 700;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 16px;
+    display: inline-block; width: 100%;
+  }
+  .badge-siswa { background: #e0f7f9; color: #1FA3B8; }
+  .badge-guru  { background: #EDE9FE; color: #7C3AED; }
+  .badge-admin { background: #FEE2E2; color: #DC2626; }
+
+  /* Tabs */
+  .tabs { display: flex; margin-bottom: 20px; background: #f0f4f8; border-radius: 12px; padding: 4px; }
+  .tab {
+    flex: 1; padding: 9px; border: none; background: none; border-radius: 10px;
+    font-size: 13px; font-weight: 700; cursor: pointer; color: #718096;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .tab.active { background: white; color: #1FA3B8; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+  .hide-register .tab[data-tab="register"] { display: none; }
+
+  .form-group { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; font-weight: 700; color: #1E6773; margin-bottom: 6px; }
+
+  .label-guru { color: #5B21B6; }
+
+  input, select {
+    width: 100%; padding: 11px 14px; border: 2px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; font-family: inherit; transition: border-color 0.2s; outline: none;
+    background: white; color: #2d3748;
+  }
+  input:focus, select:focus { border-color: #1FA3B8; }
+
+  .focus-guru:focus { border-color: #7C3AED; }
+
+  select { appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23718096' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px; cursor: pointer;
+  }
+
+  .form-row { display: flex; gap: 10px; }
+  .form-row .form-group { flex: 1; }
+
+  .extra-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    margin-bottom: 12px; width: fit-content;
+  }
+  .extra-badge-siswa { background: #e0f7f9; color: #1FA3B8; }
+  .extra-badge-guru  { background: #EDE9FE; color: #7C3AED; }
+
+  .field-divider {
+    border: none; border-top: 1.5px dashed #e2e8f0;
+    margin: 14px 0;
+  }
+
+  .field-hint {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .admin-only-hint { background: #FEF3C7; color: #92400E; border: 1px solid #F59E0B; }
+
+  .field-note { font-size: 11px; color: #a0aec0; margin-top: 5px; padding-left: 2px; }
+
+  /* Kelas + Kelas Detail row */
+  .kelas-row { display: flex; gap: 10px; }
+  .kelas-row .form-group { flex: 1; }
+
+  .btn {
+    width: 100%; padding: 13px; border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+    margin-top: 6px; transition: all 0.2s; color: white;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-siswa { background: linear-gradient(135deg, #1FA3B8, #6da0af); }
+  .btn-siswa:hover { box-shadow: 0 8px 24px rgba(31,163,184,0.35); }
+  .btn-guru  { background: linear-gradient(135deg, #7C3AED, #9F67FA); }
+  .btn-guru:hover  { box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
+  .btn-admin { background: linear-gradient(135deg, #DC2626, #EF4444); }
+  .btn-admin:hover { box-shadow: 0 8px 24px rgba(220,38,38,0.35); }
+
+  .error {
+    background: #fff5f5; border: 1px solid #fc8181; color: #c53030;
+    padding: 10px 14px; border-radius: 10px; font-size: 13px;
+    margin-bottom: 14px; text-align: center;
+  }
+
+  .admin-info {
+    background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 10px;
+    padding: 10px 14px; font-size: 12px; color: #92400E; margin-bottom: 14px;
+    display: none;
+  }
+  .admin-info.show { display: block; }
+
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+
+  .extra-fields { display: none; }
+  .extra-fields.show { display: block; animation: fadeSlide 0.3s ease; }
+  @keyframes fadeSlide { from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);} }
+
+  /* Kelas detail hidden by default */
+  .kelas-detail-wrap { display: none; }
+  .kelas-detail-wrap.show { display: block; animation: fadeSlide 0.25s ease; }
+
+  /* Success overlay */
+  .success-overlay {
+    position: fixed; inset: 0; display: none; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 1000;
+  }
+  .success-overlay.show { display: flex; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
+  .overlay-siswa { background: rgba(31,163,184,0.96); }
+  .overlay-guru  { background: rgba(124,58,237,0.96); }
+  .overlay-admin { background: rgba(220,38,38,0.96); }
+  .success-icon  { font-size: 80px; margin-bottom: 20px; animation: bounceIn 0.6s ease; }
+  @keyframes bounceIn { 0%{transform:scale(0);}70%{transform:scale(1.2);}100%{transform:scale(1);} }
+  .success-title { font-family:'Nunito',sans-serif; font-size:30px; font-weight:900; color:white; margin-bottom:8px; text-align:center; }
+  .success-sub   { font-size:15px; color:rgba(255,255,255,0.85); margin-bottom:28px; text-align:center; }
+  .success-btn   {
+    background: white; padding: 12px 28px; border-radius: 14px;
+    font-size: 15px; font-weight: 700; border: none; cursor: pointer;
+    font-family: inherit; text-decoration: none; display: inline-flex;
+    align-items: center; gap: 8px; transition: all 0.2s;
+  }
+  .success-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+  .success-btn.color-siswa { color: #1FA3B8; }
+  .success-btn.color-guru  { color: #7C3AED; }
+  .success-btn.color-admin { color: #DC2626; }
+</style>
+</head>
+<body>
+
+<div class="bg-circle"></div>
+<div class="bg-circle"></div>
+<div class="bg-circle"></div>
+
+<!-- Success Overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon"  id="successIcon">🎉</div>
+  <div class="success-title" id="successTitle">Selamat Datang!</div>
+  <div class="success-sub"   id="successSub">Login berhasil!</div>
+  <a href="/dashboard" class="success-btn" id="successBtn">Ke Dashboard</a>
+</div>
+
+<div class="container" id="mainContainer">
+  <div class="logo">
+    <img src="{{ url_for('static', filename='images/lidm.bg.png') }}" alt="Logo"
+         style="height:38px;width:auto;border-radius:8px;">
+    ISYARA
+  </div>
+  <p class="subtitle">Platform Pembelajaran Bahasa Isyarat Berbasis AI</p>
+
+  <!-- Role Cards -->
+  <div class="role-selector">
+    <button class="role-btn active" data-role="siswa" onclick="selectRole('siswa', this)">
+      <div class="role-name role-name-siswa">Siswa</div>
+      <div class="role-desc">Akses pembelajaran</div>
+    </button>
+    <button class="role-btn" data-role="guru" onclick="selectRole('guru', this)">
+      <div class="role-name role-name-guru">Guru</div>
+      <div class="role-desc">Kelola siswa</div>
+    </button>
+    <button class="role-btn" data-role="admin" onclick="selectRole('admin', this)">
+      <div class="role-name role-name-admin">Admin</div>
+      <div class="role-desc">Kelola sistem</div>
+    </button>
+  </div>
+
+  <!-- Info box admin -->
+  <div class="admin-info" id="adminInfo">
+    Login Admin hanya tersedia untuk pengelola sistem. Akun Admin tidak bisa didaftarkan sendiri.
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="tabsContainer">
+    <button class="tab active" data-tab="login"    onclick="switchTab('login', this)">Masuk</button>
+    <button class="tab"        data-tab="register" onclick="switchTab('register', this)">Daftar</button>
+  </div>
+
+  {% if error %}
+  <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- LOGIN FORM                                 -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="form-section active" id="loginForm">
+    <form method="POST">
+      <input type="hidden" name="action" value="login">
+      <input type="hidden" name="role" id="loginRole" value="siswa">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Masukkan username" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Masukkan password" required>
+      </div>
+      <button type="submit" class="btn btn-siswa" id="loginBtn">Masuk sebagai Siswa</button>
+    </form>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- REGISTER FORM                              -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="form-section" id="registerForm">
+    <form method="POST">
+      <input type="hidden" name="action" value="register">
+      <input type="hidden" name="role" id="registerRole" value="siswa">
+
+      <!-- Akun dasar -->
+      <div class="form-group">
+        <label id="regUsernameLabel">Username</label>
+        <input type="text" name="username" placeholder="Buat username" required>
+      </div>
+      <div class="form-group">
+        <label id="regPasswordLabel">Password</label>
+        <input type="password" name="password" placeholder="Min. 6 karakter" required>
+      </div>
+
+      <!-- ───── EXTRA: Siswa ───── -->
+      <div class="extra-fields show" id="extraSiswa">
+        <hr class="field-divider">
+        <div class="extra-badge extra-badge-siswa">📋 Data Siswa</div>
+
+        <!-- Kelas + Kelas Detail (huruf) dalam satu baris -->
+        <div class="kelas-row">
+          <div class="form-group">
+            <label>Kelas</label>
+            <select name="kelas" id="selectKelas" onchange="onKelasChange(this.value)">
+              <option value="" disabled selected>Pilih kelas</option>
+              <option value="5">Kelas 5</option>
+              <option value="6">Kelas 6</option>
+            </select>
+          </div>
+          <div class="form-group kelas-detail-wrap" id="kelasDetailWrap">
+            <label>Rombel</label>
+            <select name="kelas_detail" id="selectKelasDetail">
+              <option value="" disabled selected>Pilih kelas</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Asal Sekolah — SLB di Yogyakarta -->
+        <div class="form-group">
+          <label>Nama Sekolah
+            <span class="field-hint admin-only-hint">🔒 Dikelola Admin</span>
+          </label>
+          <select name="sekolah" id="selectSekolahSiswa">
+            <option value="" disabled selected>Pilih sekolah</option>
+            {% for s in schools_list %}
+            <option value="{{ s.id }}">{{ s.nama }}</option>
+            {% else %}
+            <!-- SLB di Yogyakarta -->
+            <option value="slb1">SLB Negeri 1 Yogyakarta</option>
+            <option value="slb2">SLB Negeri 2 Yogyakarta</option>
+            <option value="slb3">SLB Wiyata Dharma 1 Sleman</option>
+            <option value="slb4">SLB Wiyata Dharma 2 Sleman</option>
+            <option value="slb5">SLB Wiyata Dharma 3 Sleman</option>
+            <option value="slb6">SLB Yapenas Condong Catur</option>
+            <option value="slb7">SLB Autisma Dian Amanah</option>
+            <option value="slb8">SLB PKK Provinsi DIY</option>
+            <option value="slb9">SLB A Yaketunis Yogyakarta</option>
+            <option value="slb10">SLB B Karnnamanohara</option>
+            <option value="slb11">SLB Ma'arif Bantul</option>
+            <option value="slb12">SLB Negeri Pembina Yogyakarta</option>
+            {% endfor %}
+          </select>
+          <div class="field-note">
+            Sekolah tidak ada dalam daftar? Hubungi Admin untuk ditambahkan.
+          </div>
+        </div>
+      </div>
+      <!-- ───────────────────────────────────────── -->
+
+      <!-- ───── EXTRA: Guru ───── -->
+      <div class="extra-fields" id="extraGuru">
+        <hr class="field-divider">
+        <div class="extra-badge extra-badge-guru">🏫 Data Guru</div>
+
+        <!-- Asal Sekolah — SLB di Yogyakarta -->
+        <div class="form-group">
+          <label class="label-guru">Asal Sekolah
+            <span class="field-hint admin-only-hint" style="color:#7C3AED;">🔒 Dikelola Admin</span>
+          </label>
+          <select name="asal_sekolah" id="selectSekolahGuru" class="focus-guru">
+            <option value="" disabled selected>Pilih sekolah asal</option>
+            {% for s in schools_list %}
+            <option value="{{ s.id }}">{{ s.nama }}</option>
+            {% else %}
+            <!-- SLB di Yogyakarta -->
+            <option value="slb1">SLB Negeri 1 Yogyakarta</option>
+            <option value="slb2">SLB Negeri 2 Yogyakarta</option>
+            <option value="slb3">SLB Wiyata Dharma 1 Sleman</option>
+            <option value="slb4">SLB Wiyata Dharma 2 Sleman</option>
+            <option value="slb5">SLB Wiyata Dharma 3 Sleman</option>
+            <option value="slb6">SLB Yapenas Condong Catur</option>
+            <option value="slb7">SLB Autisma Dian Amanah</option>
+            <option value="slb8">SLB PKK Provinsi DIY</option>
+            <option value="slb9">SLB A Yaketunis Yogyakarta</option>
+            <option value="slb10">SLB B Karnnamanohara</option>
+            <option value="slb11">SLB Ma'arif Bantul</option>
+            <option value="slb12">SLB Negeri Pembina Yogyakarta</option>
+            {% endfor %}
+          </select>
+          <div class="field-note" style="color:#7C3AED99;">
+            Sekolah tidak ada dalam daftar? Hubungi Admin untuk ditambahkan.
+          </div>
+        </div>
+
+        <!-- Kelas yang Diajar -->
+        <div class="kelas-row">
+          <div class="form-group">
+            <label class="label-guru">Kelas yang Diajar</label>
+            <select name="kelas_guru" id="selectKelasGuru" class="focus-guru" onchange="onKelasGuruChange(this.value)">
+              <option value="" disabled selected>Pilih kelas</option>
+              <option value="5">Kelas 5</option>
+              <option value="6">Kelas 6</option>
+            </select>
+          </div>
+          <div class="form-group kelas-detail-wrap" id="kelasDetailGuruWrap">
+            <label class="label-guru">Rombel</label>
+            <select name="kelas_detail_guru" id="selectKelasDetailGuru" class="focus-guru">
+              <option value="" disabled selected>Pilih rombel</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Jenjang yang Diajar — hanya SD -->
+        <div class="form-group">
+          <label class="label-guru">Jenjang yang Diajar</label>
+          <select name="jenjang" class="focus-guru">
+            <option value="sd" selected>SD (Sekolah Dasar)</option>
+          </select>
+        </div>
+      </div>
+      <!-- ───────────────────────────────────────── -->
+
+      <button type="submit" class="btn btn-siswa" id="registerBtn">Daftar sebagai Siswa</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  let selectedRole = 'siswa';
+
+  // Mapping kelas → pilihan rombel
+  const ROMBEL_MAP = {
+    '5': ['5A', '5B'],
+    '6': ['6A', '6B'],
+  };
+
+  function onKelasGuruChange(val) {
+    const wrap   = document.getElementById('kelasDetailGuruWrap');
+    const select = document.getElementById('selectKelasDetailGuru');
+    if (ROMBEL_MAP[val]) {
+      select.innerHTML = '<option value="" disabled selected>Pilih rombel</option>';
+      ROMBEL_MAP[val].forEach(rombel => {
+        const opt = document.createElement('option');
+        opt.value = rombel.toLowerCase();
+        opt.textContent = 'Kelas ' + rombel;
+        select.appendChild(opt);
+      });
+      wrap.classList.add('show');
+    } else {
+      wrap.classList.remove('show');
+    }
+  }
+
+  function onKelasChange(val) {
+    const wrap   = document.getElementById('kelasDetailWrap');
+    const select = document.getElementById('selectKelasDetail');
+
+    if (ROMBEL_MAP[val]) {
+      // Populate options
+      select.innerHTML = '<option value="" disabled selected>Pilih kelas</option>';
+      ROMBEL_MAP[val].forEach(rombel => {
+        const opt = document.createElement('option');
+        opt.value = rombel.toLowerCase().replace(' ', '');
+        opt.textContent = 'Kelas ' + rombel;
+        select.appendChild(opt);
+      });
+      wrap.classList.add('show');
+    } else {
+      wrap.classList.remove('show');
+    }
+  }
+
+  const ROLE_CONFIG = {
+    siswa: {
+      badge:      '🎓 Mode Siswa',
+      badgeClass: 'badge-siswa',
+      loginTxt:   'Masuk sebagai Siswa',
+      regTxt:     'Daftar sebagai Siswa',
+      btnClass:   'btn-siswa',
+      info:       false,
+      hideReg:    false,
+    },
+    guru: {
+      badge:      '👨‍🏫 Mode Guru',
+      badgeClass: 'badge-guru',
+      loginTxt:   'Masuk sebagai Guru',
+      regTxt:     'Daftar sebagai Guru',
+      btnClass:   'btn-guru',
+      info:       false,
+      hideReg:    false,
+    },
+    admin: {
+      badge:      '🛡️ Mode Admin',
+      badgeClass: 'badge-admin',
+      loginTxt:   'Masuk sebagai Admin',
+      regTxt:     '',
+      btnClass:   'btn-admin',
+      info:       true,
+      hideReg:    true,
+    },
+  };
+
+  function selectRole(role, btn) {
+    selectedRole = role;
+    const cfg = ROLE_CONFIG[role];
+
+    document.getElementById('loginRole').value    = role;
+    document.getElementById('registerRole').value = role;
+
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const badge = document.getElementById('roleBadge');
+    badge.className   = `role-badge ${cfg.badgeClass}`;
+    badge.textContent = cfg.badge;
+
+    document.getElementById('adminInfo').classList.toggle('show', cfg.info);
+
+    const tabs = document.getElementById('tabsContainer');
+    tabs.classList.toggle('hide-register', cfg.hideReg);
+    if (cfg.hideReg) {
+      switchTab('login', document.querySelector('.tab[data-tab="login"]'));
+    }
+
+    const loginBtn    = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    loginBtn.className    = `btn ${cfg.btnClass}`;
+    registerBtn.className = `btn ${cfg.btnClass}`;
+    loginBtn.textContent    = cfg.loginTxt;
+    registerBtn.textContent = cfg.regTxt;
+
+    const extraSiswa = document.getElementById('extraSiswa');
+    const extraGuru  = document.getElementById('extraGuru');
+    extraSiswa.classList.toggle('show', role === 'siswa');
+    extraGuru.classList.toggle('show',  role === 'guru');
+
+    updateInputFocus(role);
+  }
+
+  function updateInputFocus(role) {
+    const focusColor = role === 'guru' ? '#7C3AED' : role === 'admin' ? '#DC2626' : '#1FA3B8';
+    let styleEl = document.getElementById('dynamicFocus');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'dynamicFocus';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = `input:focus, select:focus { border-color: ${focusColor} !important; }`;
+  }
+
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+    document.getElementById(tab + 'Form').classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  // Success overlay dari Flask
+  {% if show_success %}
+    const _role     = "{{ login_role }}";
+    const _username = "{{ login_username }}";
+    const cfg       = {
+      siswa: { icon:'🎓', sub:'Yuk mulai belajar BISINDO! 🎉',     cls:'overlay-siswa', btnCls:'color-siswa' },
+      guru:  { icon:'👨‍🏫', sub:'Dashboard Guru siap untukmu! 🎉',  cls:'overlay-guru',  btnCls:'color-guru'  },
+      admin: { icon:'🛡️', sub:'Panel Admin siap digunakan! 🔐',    cls:'overlay-admin', btnCls:'color-admin' },
+    }[_role] || { icon:'🎉', sub:'Login berhasil!', cls:'overlay-siswa', btnCls:'color-siswa' };
+
+    const overlay = document.getElementById('successOverlay');
+    overlay.classList.add('show', cfg.cls);
+    document.getElementById('successIcon').textContent  = cfg.icon;
+    document.getElementById('successTitle').textContent = `Selamat Datang, ${_username}!`;
+    document.getElementById('successSub').textContent   = cfg.sub;
+    document.getElementById('successBtn').classList.add(cfg.btnCls);
+    setTimeout(() => { window.location.href = '/dashboard'; }, 2500);
+  {% endif %}
+</script>
+</body>
+</html>

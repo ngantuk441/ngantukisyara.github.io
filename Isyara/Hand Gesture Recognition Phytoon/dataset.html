@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dataset ISYARA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #F8F9FF; color: #1E6773; margin: 0; padding: 40px; }
+    h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .sub { color: #718096; font-size: 14px; margin-bottom: 32px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; margin-bottom: 40px; }
+    .stat-card { background: white; border: 1.5px solid #E8ECFF; border-radius: 14px; padding: 16px 10px; text-align: center; }
+    .stat-letter { font-size: 22px; font-weight: 900; color: #1FA3B8; }
+    .stat-num { font-size: 13px; font-weight: 600; color: #718096; margin-top: 4px; }
+    .progress-bar { background: #E8ECFF; border-radius: 4px; height: 6px; margin-top: 8px; }
+    .progress-fill { background: #1FA3B8; height: 6px; border-radius: 4px; }
+    .total-box { background: #1FA3B8; color: white; border-radius: 14px; padding: 20px 28px; display: inline-block; margin-bottom: 32px; font-size: 18px; font-weight: 700; }
+    .back-btn { display: inline-block; margin-bottom: 28px; background: white; border: 1.5px solid #E8ECFF; color: #1FA3B8; padding: 8px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 14px; }
+    .error { background: #fff3f3; border: 1.5px solid #ffcdd2; color: #c0392b; padding: 16px 20px; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <a href="/" class="back-btn">← Kembali ke Beranda</a>
+  <h1>Dataset BISINDO</h1>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% else %}
+    <p class="sub">Total data terkumpul di dataset.csv</p>
+    <div class="total-box">Total: {{ total }} data</div>
+    <div class="stats-grid">
+      {% for row in stats %}
+      <div class="stat-card">
+        <div class="stat-letter">{{ row.label }}</div>
+        <div class="stat-num">{{ row.jumlah }} data</div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ [row.jumlah / 3, 100] | min }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <nama>Noe</nama>
+  <prodi>Pendidikan Administrasi Perkantoran</prodi>
+</data>
+
+<div class="hand-sign">🤟</div>
+
+<img class="hand-sign-img" src="{{ url_for('static', filename='images/hand-sign.png') }}" alt="Hand sign">
+
+<div class="feature-icon-wrap">🎮</div>
+
+/style.css') }}">
+
+<a href="#beranda" class="nav-logo">
+  <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo ISYARA" class="logo-icon">
+  ISYARA
+</a>
+
+<img src="{{ url_for('static', filename='images/lidm.png') }}" alt="Foto">
