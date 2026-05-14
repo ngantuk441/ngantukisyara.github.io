@@ -181,42 +181,25 @@ def admin_required(f):
 
 
 def generate_frames():
-    # Jangan panggil VideoCapture(0) di server Render!
+   def generate_frames():
+    # Fungsi ini dimodifikasi agar tidak memanggil hardware kamera di server
+    import numpy as np
     while True:
-        # Kita kirim frame kosong atau placeholder dulu
-        import numpy as np
+        # 1. Buat frame hitam kosong
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
-        cv2.putText(frame, "Kamera hanya bisa diakses via browser", (50, 240), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         
+        # 2. Tambahkan tulisan pemberitahuan
+        cv2.putText(frame, "Mode Server: Kamera dinonaktifkan", (100, 200), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+        cv2.putText(frame, "Gunakan webcam browser untuk deteksi", (80, 260), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        
+        # 3. Encode jadi JPG
         _, buffer = cv2.imencode(".jpg", frame)
-        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        predicted, confidence = process_frame(frame.copy())
-
-        frame_show = cv2.flip(frame, 1)
-        rgb        = cv2.cvtColor(frame_show, cv2.COLOR_BGR2RGB)
-        results    = hands.process(rgb)
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                mp_drawing.draw_landmarks(
-                    frame_show, hand_landmarks, mp_hands.HAND_CONNECTIONS,
-                    mp_drawing.DrawingSpec(color=(0, 0, 0), thickness=3, circle_radius=2),
-                    mp_drawing.DrawingSpec(color=(0, 255, 255), thickness=2)
-                )
-                wrist   = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
-                h, w, _ = frame_show.shape
-                cx, cy  = int(wrist.x * w), int(wrist.y * h)
-                cv2.putText(frame_show, f"{predicted} ({confidence}%)",
-                            (cx - 40, cy - 20), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 3)
-
-        _, buffer = cv2.imencode(".jpg", frame_show, [cv2.IMWRITE_JPEG_QUALITY, 70])
-        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
+        
+        # 4. Kirim ke stream web
+        yield (b"--frame\r\n"
+               b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
 
 
 # ── HELPER GEMINI ─────────────────────────────────────────────
