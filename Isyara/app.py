@@ -532,8 +532,10 @@ Rekomendasikan 3 huruf berikutnya dan 1 kata sederhana yang bisa dicoba. Maksima
 
 
 if __name__ == "__main__":
-    import os
-    # Render akan mengisi variable PORT secara otomatis
-    port = int(os.environ.get("PORT", 10000))
-    print(f"Starting ISYARA on port {port}...")
-    app.run(host="0.0.0.0", port=port, debug=False)
+    try:
+        import os
+        port = int(os.environ.get("PORT", 10000))
+        print(f"Mencoba menjalankan Isyara di port {port}...")
+        app.run(host="0.0.0.0", port=port, debug=False)
+    except Exception as e:
+        print(f"Waduh, error di sini: {e}")
