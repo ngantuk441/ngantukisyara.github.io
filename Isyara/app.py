@@ -532,5 +532,8 @@ Rekomendasikan 3 huruf berikutnya dan 1 kata sederhana yang bisa dicoba. Maksima
 
 
 if __name__ == "__main__":
-    print("Starting ISYARA... buka http://127.0.0.1:5000")
-    app.run(debug=False, host="0.0.0.0", port=5000, threaded=True)
+    import os
+    # Render akan mengisi variable PORT secara otomatis
+    port = int(os.environ.get("PORT", 10000))
+    print(f"Starting ISYARA on port {port}...")
+    app.run(host="0.0.0.0", port=port, debug=False)
