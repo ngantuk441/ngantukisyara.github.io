@@ -181,11 +181,16 @@ def admin_required(f):
 
 
 def generate_frames():
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    cap.set(cv2.CAP_PROP_FPS, 30)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    # Jangan panggil VideoCapture(0) di server Render!
+    while True:
+        # Kita kirim frame kosong atau placeholder dulu
+        import numpy as np
+        frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        cv2.putText(frame, "Kamera hanya bisa diakses via browser", (50, 240), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+        
+        _, buffer = cv2.imencode(".jpg", frame)
+        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
 
     while True:
         ret, frame = cap.read()
