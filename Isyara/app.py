@@ -181,26 +181,28 @@ def admin_required(f):
 
 
 def generate_frames():
-   def generate_frames():
-    # Fungsi ini dimodifikasi agar tidak memanggil hardware kamera di server
     import numpy as np
+    import time
+    
     while True:
-        # 1. Buat frame hitam kosong
+        # 1. Buat frame hitam buatan (agar server tidak mencari kamera)
         frame = np.zeros((480, 640, 3), dtype=np.uint8)
         
-        # 2. Tambahkan tulisan pemberitahuan
-        cv2.putText(frame, "Mode Server: Kamera dinonaktifkan", (100, 200), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-        cv2.putText(frame, "Gunakan webcam browser untuk deteksi", (80, 260), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+        # 2. Tambahkan tulisan informasi
+        cv2.putText(frame, "ISYARA SERVER ACTIVE", (160, 200), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        cv2.putText(frame, "Mode: Cloud Hosting (No Camera)", (120, 260), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         
-        # 3. Encode jadi JPG
+        # 3. Encode jadi format gambar JPG
         _, buffer = cv2.imencode(".jpg", frame)
         
-        # 4. Kirim ke stream web
+        # 4. Kirim ke web browser
         yield (b"--frame\r\n"
                b"Content-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
-
+        
+        # 5. Kasih jeda sedikit agar server tidak panas
+        time.sleep(0.1)
 
 # ── HELPER GEMINI ─────────────────────────────────────────────
 def ask_gemini(prompt):
